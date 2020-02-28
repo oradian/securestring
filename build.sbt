@@ -1,24 +1,9 @@
 name := "securestring"
-
-version := "0.0.1"
-
+version := "0.0.2"
 organization := "de.choffmeister"
 
-scalaVersion := "2.10.3"
+crossScalaVersions := Seq("2.11.12", "2.12.10", "2.13.1")
 
 libraryDependencies ++= Seq(
-  "junit" % "junit" % "4.11" % "test",
-  "org.specs2" %% "specs2" % "2.2.3" % "test"
+  "org.specs2" %% "specs2-core" % "4.8.3" % Test,
 )
-
-testOptions in Test += Tests.Argument("junitxml", "console")
-
-publishMavenStyle := true
-
-publishTo := Some(Resolver.sftp("repo.choffmeister.de", "choffmeister.de", "/var/www/de.choffmeister.repo/maven2"))
-
-ScctPlugin.instrumentSettings
-
-CoveragePlugin.coverageSettings
-
-EclipseKeys.withSource := true

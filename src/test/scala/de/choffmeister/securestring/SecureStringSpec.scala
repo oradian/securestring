@@ -1,54 +1,49 @@
 package de.choffmeister.securestring
 
-import org.specs2.mutable._
-import org.specs2.runner.JUnitRunner
-import org.junit.runner.RunWith
-
-@RunWith(classOf[JUnitRunner])
-class SecureStringSpec extends Specification {
+class SecureStringSpec extends org.specs2.mutable.Specification {
   "clear input arrays" in {
     val chars = "test".toCharArray
-    chars.mkString === "test"
-    val ss1 = SecureString(chars)
-    chars.mkString === "\0\0\0\0"
-    ss1.read(_.mkString === "test")
+    chars.mkString ==== "test"
+    val ss1 = SecureString.consume(chars)
+    chars.mkString ==== "\u0000" * 4
+    ss1.readChars(_.mkString ==== "test")
 
     val bytes = "test2".getBytes("UTF-8")
-    val ss2 = new SecureString(bytes)
-    bytes.toList === List[Byte](0, 0, 0, 0, 0)
-    ss2.read(_.mkString === "test2")
+    val ss2 = SecureString.consume(bytes)
+    bytes.toList ==== List[Byte](0, 0, 0, 0, 0)
+    ss2.readChars(_.mkString ==== "test2")
   }
 
   "detect equality" in {
-    val ss1 = SecureString("test".toCharArray)
-    val ss2 = SecureString("test".toCharArray)
-    val ss3 = SecureString("test1".toCharArray)
-    val ss4 = SecureString("test2".toCharArray)
+    val ss1 = SecureString.consume("test".toCharArray)
+    val ss2 = SecureString.consume("test".toCharArray)
+    val ss3 = SecureString.consume("test1".toCharArray)
+    val ss4 = SecureString.consume("test2".toCharArray)
 
-    ss1 === ss2
-    ss1 !== ss3
-    ss3 !== ss4
+    ss1 ==== ss2
+    ss1 !=== ss3
+    ss3 !=== ss4
     ss1 !== new Object()
     ss1 !== 1
     ss1 !== "test"
   }
 
   "allow temporary reading" in {
-    val ss1 = SecureString("test1".toCharArray)
-    val ss2 = SecureString("test2".toCharArray)
+    val ss1 = SecureString.consume("test1".toCharArray)
+    val ss2 = SecureString.consume("test2".toCharArray)
 
-    ss1.read(_ === "test1".toCharArray)
-    ss2.read(_ === "test2".toCharArray)
-    ss1.readBytes(_ === "test1".getBytes("UTF-8"))
-    ss2.readBytes(_ === "test2".getBytes("UTF-8"))
+    ss1.readChars(_ ==== "test1".toCharArray)
+    ss2.readChars(_ ==== "test2".toCharArray)
+    ss1.readBytes(_ ==== "test1".getBytes("UTF-8"))
+    ss2.readBytes(_ ==== "test2".getBytes("UTF-8"))
   }
 
   "wipe" in {
-    val ss = SecureString("password".toCharArray)
-    ss.read(_.mkString === "password")
-    ss.readBytes(_.toList === "password".getBytes("UTF-8").toList)
+    val ss = SecureString.consume("password".toCharArray)
+    ss.readChars(_.mkString ==== "password")
+    ss.readBytes(_.toList ==== "password".getBytes("UTF-8").toList)
     ss.wipe()
-    ss.read(_.mkString !== "password") must throwA
+    ss.readChars(_.mkString !=== "password") must throwA
     ss.readBytes(_.toList != "password".getBytes("UTF-8").toList) must throwA
   }
 }
